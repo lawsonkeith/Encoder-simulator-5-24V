@@ -18,6 +18,25 @@
  Red LED      10-.1KHz
  Bi           .1K - 1K
  
+ 
+ Notes on Mini
+ -------------
+ 
+ The mini is not pin-pin compatible with the minipro programming header and an adapter
+ header needs to e made to program the unit.  This is done using a 5 w 2.54 header strip
+ remove a min and bend the last one then either solder or friction fit to program it.
+ 
+          PGMR
+ | dtr rx tx vcc cts gnd |
+ -------------------------
+       |  |  |     __|
+       |  |  |    /
+ -------------------------
+ | x  tx rx vcc gnd  x    |
+ 
+ reset btn just before pgm.  Use 2.54 header to make interface and balance
+ in holes.
+ 
  */
 
 // Pin 13 has an LED connected on most Arduino boards.
