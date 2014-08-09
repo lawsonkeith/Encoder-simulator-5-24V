@@ -2,6 +2,7 @@
  Encoder sim
  -----------
  
+ 
  K Lawson 2014
  
  Use a pot to control the cycle speed of an encoder simulator.  An A and B channel drive in either direction at speeds from 1-10K Hz.
@@ -34,10 +35,12 @@
  -------------------------
  | x  tx rx vcc gnd  x    |
  
- reset btn just before pgm.  Use 2.54 header to make interface and balance
+ reset btn just before pgm when the IDE says 'uploading'.  Use 2.54 header to make interface and balance
  in holes.
  
  */
+ 
+ 
 
 // Pin 13 has an LED connected on most Arduino boards.
 // give it a name:
@@ -100,7 +103,7 @@ void setup() {
 void loop() 
 {
   static unsigned long msDelay, usDelay, TrigTime, SampleTime, FlashTime, uTime;
-  static byte Pos,Speed,SeqEnd,Power, On;
+  static byte Pos,Speed,SeqEnd,Power, On, SimSpeed;
   static int x;
 
   uTime = micros();
@@ -123,15 +126,22 @@ void loop()
 
   // @@@@@@@@@@ 1-40KHz FAST Driver loop ( variable freq ) @@@@@@@@@@@@@
   //
-  if(uTime >= TrigTime)
+  // if time to go to next sim state OR pot has changed val
+  if(abs(Speed-SimSpeed) > 2)
+  {
+    // if user has moved the pot a bit then trigger state change - for slow times
+    // otherwise its unresponsive around the null point
+    TrigTime = uTime;
+  }
+  //Time for a state change!
+  if((uTime >= TrigTime))
   {
     TrigTime += usDelay;
-
     //drive IO; 5 cycle state machine Tell it dir and on/off status
     SimulateEncoder(Pos,On);
-
-
+    SimSpeed=Speed;  
   }//DELAY
+
 
   // Catch any rollover strangeness
   if(uTime < 100)
@@ -144,13 +154,20 @@ void loop()
 
 
 
-
+//
 // read the freq pot.  0-3V equates to 0-1023
 // The delays vary a lot so we output ms or us.
 // Pos tells the drive module to go fwd / rev
 // pow describes the output frequncy and is used to
 // change the LED colour.
 //
+// *msDelay  delay tme to be returned (not used)
+// *usDelay  delay tme to be returned in us
+// *Pos      output TRUE /FALSE simulate encoder going Fwd / back
+// *Speed    0-255 represents speed of encoder sim (255) = fast used for LED display
+// *Power    0,1,2 tells the LED diaply the band of simulationspeed for LED colour.
+// *On       The mid position has a dead band; when in this region turn the 
+//            simulation off
 void DecodePot(unsigned long *msDelay, unsigned long *usDelay, byte *Pos, byte *Speed, byte *Power, byte *On)
 {
   unsigned long val;
